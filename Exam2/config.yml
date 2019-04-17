@@ -1,0 +1,34 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  
+  tasks:
+          - name: "Installing docker requierd packets"
+            yum:
+                    name: "{{ packages }}"
+                    state: latest
+            vars:
+                    packages:
+                            - yum-utils
+                            - device-mapper-persistent-data
+                            - lvm2
+          
+          - name: "Adding up the stable repository"
+            yum_repository:
+                    name: docker
+                    description: docker repo
+                    baseurl: https://download.docker.com/linux/centos/docker-ce.repo
+  
+          - name: "Installing docker-ce"
+            command: sudo yum install docker-ce
+   
+          - name: "Add docker to a group"
+            command: sudo usermod -a -G docker $(whoami)
+
+          - name: "Enabling and starting docker"
+            service:
+                    name: docker
+                    state: started
+                    enabled: yes
