@@ -1,3 +1,4 @@
 .vagrant/
 Disks/
 ../
+docker_playbook.retry

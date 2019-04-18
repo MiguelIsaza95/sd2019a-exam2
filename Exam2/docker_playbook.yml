@@ -1,0 +1,82 @@
+- hosts: all
+  become: yes
+  tasks:
+          - name: install Docker
+            yum:
+                    name: docker
+                    state: present
+                    update_cache: true
+
+  
+          - name: start Docker
+            service:
+                    name: docker
+                    state: started
+
+          - name: Check if Docker compose is installed
+            command: docker-compose --version
+            register: docker_compose_check
+            ignore_errors: yes
+          
+          - name: Download and install Docker compose
+            get_url:
+                    url: https://github.com/docker/compose/releases/download/1.21.2/docker-compose-Linux-x86_64
+                    dest: /usr/bin/docker-compose
+                    mode: 0755
+            when:
+                    - docker_compose_check.msg is defined
+                    - docker_compose_check.msg.find('No such file or directory') != -1
+   
+          - name: disable SELinux     
+            command: setenforce 0
+  
+          - name: disable SELinux on reboot
+            selinux:
+                    state: disabled
+   
+          - name: ensure net.bridge.bridge-nf-call-ip6tables is set to 1
+            sysctl:
+                    name: net.bridge.bridge-nf-call-ip6tables
+                    value: 1
+                    state: present
+   
+          - name: ensure net.bridge.bridge-nf-call-iptables is set to 1
+            sysctl:
+                    name: net.bridge.bridge-nf-call-iptables
+                    value: 1
+                    state: present
+   
+          - name: add Kubernetes' YUM repository
+            yum_repository:
+                    name: Kubernetes
+                    description: Kubernetes YUM repository
+                    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+                    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+                    gpgcheck: yes
+ 
+          - name: install kubelet
+            yum:
+                    name: kubelet-1.10.12
+                    state: present
+                    update_cache: true
+   
+          - name: install kubeadm
+            yum:
+                    name: kubeadm-1.10.12
+                    state: present
+   
+          - name: start kubelet
+            service:
+                    name: kubelet
+                    enabled: yes
+                    state: started
+
+- hosts: master
+  become: yes
+  tasks:
+       
+          - name: install kubectl
+            yum:
+                    name: kubectl-1.10.12
+                    state: present
+                    allow_downgrade: yes
