@@ -27,13 +27,6 @@
                     - docker_compose_check.msg is defined
                     - docker_compose_check.msg.find('No such file or directory') != -1
    
-          - name: disable SELinux     
-            command: setenforce 0
-  
-          - name: disable SELinux on reboot
-            selinux:
-                    state: disabled
-   
           - name: ensure net.bridge.bridge-nf-call-ip6tables is set to 1
             sysctl:
                     name: net.bridge.bridge-nf-call-ip6tables
@@ -71,6 +64,59 @@
                     enabled: yes
                     state: started
 
+          
+          - name: install glusterfs
+            yum:
+                    name:
+                            - wget
+                            - centos-release-gluster
+                            - epel-release
+                            - glusterfs-server
+
+          - name: start gluster
+            service:
+                    name: glusterd
+                    state: present
+                    enabled: yes
+
+          - name: install xfs
+            yum:
+                    name: xfsprog
+
+          - name: Volume partition
+            parted:
+                    device: /dev/sdb
+                    number: 1
+                    state: present
+
+          - name: Creating a XFS fils system
+            filesystem:
+                    fstype: xfs
+                    dev: /dev/sdb1
+
+          - name: Directory
+            shell: mkdir -p /gluster/data /swarm/volumes
+
+          - name: Mount volume
+            mount:
+                    path: /dev/sdb1
+                    src: /gluster/data
+                    state: present
+                    fstype: xfs
+
+          - name: change gluster permissions
+            file:
+                    path: /var/log/glusterfs/cli.log
+                    owner: vagrant
+                    mode: 755
+
+          - name: change docker permissions
+            file:
+                    path: /var/run/docker.sock
+                    owner: vagrant
+                    mode: 755
+
+
 - hosts: master
   become: yes
   tasks:
@@ -80,3 +126,13 @@
                     name: kubectl-1.10.12
                     state: present
                     allow_downgrade: yes
+
+- host: docker-manager
+  become: yes
+  tasks:
+          - name: initialize docker swarm
+            shell: |
+                    ip=$(hostname -I | awk '{print $2}')
+                    docker swarm init --advertise-addr $ip
+
+          
