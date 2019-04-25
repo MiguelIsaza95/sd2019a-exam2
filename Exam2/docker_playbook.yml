@@ -48,6 +48,11 @@
                     gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
                     gpgcheck: yes
  
+          - name: update
+            yum:
+                    name: '*'
+                    state: latest
+          
           - name: install kubelet
             yum:
                     name: kubelet-1.10.12
@@ -70,13 +75,24 @@
                     name: '*'
                     state: latest
 
-          - name: install glusterfs
+          - name: install gluster dependencies
             yum:
                     name:
                             - wget
                             - centos-release-gluster
                             - epel-release
-                            - glusterfs-server
+
+                    state: latest
+
+          - name: install gluster
+            yum:
+                    name: glusterfs-server
+                    state: latest
+
+          - name: update
+            yum:
+                    name: '*'
+                    state: latest
 
           - name: start gluster
             service:
@@ -114,11 +130,11 @@
                     state: present
                     fstype: xfs
 
-          - name: change gluster permissions
-            file:
-                    path: /var/log/glusterfs/cli.log
-                    owner: vagrant
-                    mode: 755
+#          - name: change gluster permissions
+#            file:
+#                    path: /var/log/glusterfs/cli.log
+#                    owner: vagrant
+#                    mode: 755
 
           - name: change docker permissions
             file:
@@ -139,21 +155,21 @@
 
 - hosts: docker-manager
   become: yes
+  become_user: vagrant
+  become_method: sudo 
   tasks:
-#          - name: initialize docker swarm
-#          become_user: vagrant
-#            shell: |
-#                    ip=$(hostname -I | awk '{print $2}')
-#                    docker swarm init --advertise-addr $ip
 
-          - name: worker token
-            become: yes
-            become_user: vagrant
-            become_method: sudo
-            shell: |
-                    docker swarm join-token worker > token.txt
+          - name: init swarm
+            shell: docker swarm init --advertise-addr {{ ansible_eth1['ipv4']['address']  }}
 
-          - name: copy to localhost
-            fetch:
-                    src: token.txt
-                    dest: /home/distribuidos/Documentos/A00054628/sd2019a-exa /home/distribuidos/Documentos/A00054628/sd2019a-exam2/Exam2/
+          - name: manager token
+            shell: docker swarm join-token -q worker
+            register: token_manager
+
+- hosts: docker-worker
+  become: yes
+  become_user: vagrant
+  become_method: sudo
+  tasks:
+          - name: join in the cluster
+            shell: docker swarm join --token {{ hostvars['master']['token_manager']['stdout']  }} {{ hostvars['master']['ansible_eth1']['ipv4']['address'] }}:2377
