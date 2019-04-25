@@ -1,6 +1,7 @@
 - hosts: all
   become: yes
   tasks:
+
           - name: install Docker
             yum:
                     name: docker
@@ -64,7 +65,11 @@
                     enabled: yes
                     state: started
 
-          
+          - name: update
+            yum:
+                    name: '*'
+                    state: latest
+
           - name: install glusterfs
             yum:
                     name:
@@ -76,12 +81,17 @@
           - name: start gluster
             service:
                     name: glusterd
-                    state: present
+                    state: started
                     enabled: yes
+
+          - name: update
+            yum:
+                    name: '*'
+                    state: latest
 
           - name: install xfs
             yum:
-                    name: xfsprog
+                    name: xfsprogs
 
           - name: Volume partition
             parted:
@@ -127,12 +137,21 @@
                     state: present
                     allow_downgrade: yes
 
-- host: docker-manager
+- hosts: docker-manager
   become: yes
   tasks:
-          - name: initialize docker swarm
-            shell: |
-                    ip=$(hostname -I | awk '{print $2}')
-                    docker swarm init --advertise-addr $ip
+#          - name: initialize docker swarm
+#          become_user: vagrant
+#            shell: |
+#                    ip=$(hostname -I | awk '{print $2}')
+#                    docker swarm init --advertise-addr $ip
 
-          
+          - name: worker token
+            become_user: vagrant
+            shell: |
+                    docker swarm join-token worker > token.txt
+
+          - name: copy to localhost
+            fetch:
+                    src: /home/vagrant/token.txt
+                    dest: ~/Exam2/
