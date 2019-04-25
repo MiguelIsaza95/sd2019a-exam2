@@ -147,11 +147,13 @@
 #                    docker swarm init --advertise-addr $ip
 
           - name: worker token
+            become: yes
             become_user: vagrant
+            become_method: sudo
             shell: |
                     docker swarm join-token worker > token.txt
 
           - name: copy to localhost
             fetch:
-                    src: /home/vagrant/token.txt
-                    dest: ~/Exam2/
+                    src: token.txt
+                    dest: /home/distribuidos/Documentos/A00054628/sd2019a-exa /home/distribuidos/Documentos/A00054628/sd2019a-exam2/Exam2/
