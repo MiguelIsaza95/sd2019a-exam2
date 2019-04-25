@@ -1,4 +1,4 @@
-version: '3'
+version: '3.3'
 services:
   aplicacion:
             build: ./aplicacion
@@ -15,4 +15,47 @@ services:
                 reservations:
                   cpus: '0.05'
                   memory: 10M
+  web:
+    image: httpd
+    ports:
+      - "8088:80"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: httpd.access
+    deploy:
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 20M
+        reservations:
+          cpus: '0.05'
+          memory: 10M
+
+  fluentd:
+    build: ./aplicacion
+    volumes:
+      - ./aplicacion/conf:/fluentd/etc
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+
+  elasticsearch:
+    image: elastic/elasticsearch:6.4.3
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    expose:
+      - 9200
+    ports:
+      - "9200:9200"
+
+  kibana:
+    image: elastic/kibana:6.4.3
+    ports:
+      - "5601:5601"
 
