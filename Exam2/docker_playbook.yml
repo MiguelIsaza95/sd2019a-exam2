@@ -162,14 +162,19 @@
           - name: init swarm
             shell: docker swarm init --advertise-addr {{ ansible_eth1['ipv4']['address']  }}
 
-          - name: manager token
-            shell: docker swarm join-token -q worker
-            register: token_manager
-
 - hosts: docker-worker
   become: yes
   become_user: vagrant
   become_method: sudo
+  vars:
+          docker_swarm_manager_ip: "192.168.56.1"
   tasks:
+          - name: generate token cluster
+            shell: docker swarm join-token worker
+            register: docker_worker_token
+            delegate_to: "{{ item  }}"
+            delegate_facts: true
+            with_items: "{{ groups['docker-manager']  }}"
+
           - name: join in the cluster
-            shell: docker swarm join --token {{ hostvars['master']['token_manager']['stdout']  }} {{ hostvars['master']['ansible_eth1']['ipv4']['address'] }}:2377
+            shell: docker swarm join --token "{{ docker_worker_token.stdout  }}" "{{ docker_swarm_manager_ip  }}":2377
