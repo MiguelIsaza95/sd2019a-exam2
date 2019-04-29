@@ -2,6 +2,13 @@
   become: yes
   tasks:
 
+          - name: configuration
+            shell: |
+                    echo "192.168.56.101 node0" >> /etc/hosts
+                    echo "192.168.56.102 node1" >> /etc/hosts
+                    echo "192.168.56.103 node2" >> /etc/hosts
+                    echo "192.168.56.104 node3" >> /etc/hosts
+
           - name: install Docker
             yum:
                     name: docker
@@ -19,7 +26,7 @@
             register: docker_compose_check
             ignore_errors: yes
           
-          - name: Download and install Docker compose
+          - name: download and install Docker compose
             get_url:
                     url: https://github.com/docker/compose/releases/download/1.21.2/docker-compose-Linux-x86_64
                     dest: /usr/bin/docker-compose
@@ -161,20 +168,40 @@
 
           - name: init swarm
             shell: docker swarm init --advertise-addr {{ ansible_eth1['ipv4']['address']  }}
+            ignore_errors: yes
 
 - hosts: docker-worker
   become: yes
   become_user: vagrant
   become_method: sudo
   vars:
-          docker_swarm_manager_ip: "192.168.56.1"
+          docker_swarm_manager_ip: "192.168.56.101"
   tasks:
           - name: generate token cluster
-            shell: docker swarm join-token worker
+            shell: docker swarm join-token -q worker
+            run_once: true
             register: docker_worker_token
-            delegate_to: "{{ item  }}"
+            delegate_to: "{{ groups['docker-manager'][0]  }}"
             delegate_facts: true
-            with_items: "{{ groups['docker-manager']  }}"
+
+          - name: little debug
+            debug:
+                    msg: "{{ docker_worker_token.stdout  }}"
 
           - name: join in the cluster
             shell: docker swarm join --token "{{ docker_worker_token.stdout  }}" "{{ docker_swarm_manager_ip  }}":2377
+            run_once: true
+            ignore_errors: yes
+
+- hosts: master
+  become: yes
+  tasks:
+          - name: gluster
+            shell: |
+                    sudo gluster peer probe node1
+                    sudo gluster peer probe node2
+                    sudo gluster peer probe node3
+                    gluster pool list
+                    sudo gluster volume create swarm-vols replica 4 node0:/gluster/data node1:/gluster/data node2:/gluster/data node3:/gluster/data force
+                    sudo gluster volume set swarm-vols auth.allow 127.0.0.1
+                    sudo gluster volume start swarm-vols
