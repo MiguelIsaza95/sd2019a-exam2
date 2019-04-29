@@ -196,12 +196,17 @@
 - hosts: master
   become: yes
   tasks:
-          - name: gluster
-            shell: |
-                    sudo gluster peer probe node1
-                    sudo gluster peer probe node2
-                    sudo gluster peer probe node3
-                    gluster pool list
-                    sudo gluster volume create swarm-vols replica 4 node0:/gluster/data node1:/gluster/data node2:/gluster/data node3:/gluster/data force
-                    sudo gluster volume set swarm-vols auth.allow 127.0.0.1
-                    sudo gluster volume start swarm-vols
+          - name: gluster node_1
+            shell: gluster peer probe node1
+
+          - name: gluster node_2
+            shell: gluster peer probe node2
+
+          - name: gluster node_3
+            shell: sudo gluster peer probe node3
+
+          - name: gluster volume
+            shell: gluster volume create swarm-vols replica 4 node0:/gluster/data node1:/gluster/data node2:/gluster/data node3:/gluster/data force
+
+          - name: gluster start volume
+            shell: gluster volume start swarm-vols
