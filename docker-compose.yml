@@ -1,12 +1,12 @@
 version: "2"
 services:
-  app:
-    build: ./app
-    links:
-      - db
-    ports:
-      - "5000:5000"
-    mem_limit: 20m   
+#  app:
+#    build: ./app
+#    links:
+#      - db
+#    ports:
+#      - "5000:5000"
+#    mem_limit: 20m   
      
   db:
     image: mysql:5.7
@@ -19,10 +19,13 @@ services:
     mem_limit: 20m
 
   web:
-    image: httpd
-    ports:
-      - "8088:80"
-    logging:
+   build: ./app
+   links:
+      - db
+   ports:
+      - "5000:5000"
+   mem_limit: 20m
+   logging:
       driver: "fluentd"
       options:
         fluentd-address: localhost:24224
