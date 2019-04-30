@@ -54,40 +54,40 @@
                     name: glusterfs-server
                     state: latest
 
-          - name: update
-            yum:
-                    name: '*'
-                    state: latest
-
           - name: start gluster
             service:
                     name: glusterd
                     state: started
                     enabled: yes
 
-          - name: update
-            yum:
-                    name: '*'
-                    state: latest
+          - name: stop firewall
+            shell: systemctl stop firewalld
+
+          - name: disable firewalld
+            shell: systemctl disable firewalld
 
           - name: install xfs
             yum:
                     name: xfsprogs
 
           - name: Volume partition
-            shell: |
-                    sfdisk /dev/sdb << EOF
-                    ;
-                    EOF
+            parted:
+                    device: /dev/sdb
+                    number: 1
+                    state: present
+            ignore_errors: yes
 
           - name: Creating a XFS fils system
             shell: mkfs.xfs /dev/sdb1
+            ignore_errors: yes
 
           - name: Directory
             shell: mkdir -p /gluster/data /swarm/volumes
+            ignore_errors: yes
 
           - name: Mount volume
             shell: mount /dev/sdb1 /gluster/data/
+            ignore_errors: yes
 
 #          - name: change gluster permissions
 #            file:

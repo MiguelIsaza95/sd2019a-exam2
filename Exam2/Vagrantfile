@@ -17,10 +17,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
       vb.customize ['storageattach', :id,  '--storagectl', 'IDE', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', firstDisk]
     end
-#     master.vm.provision "ansible" do |ansible|
-#       ansible.inventory_path = 'hosts'
-#       ansible.playbook = "docker_playbook.yml"
-#    end
   end
 
    config.vm.define :worker_1 do |n1|
@@ -33,10 +29,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
        end
        vb.customize ['storageattach', :id,  '--storagectl', 'IDE', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', secondDisk]
      end
-#     n1.vm.provision "ansible" do |ansible|
-#       ansible.inventory_path = 'hosts'
-#       ansible.playbook = "docker_playbook.yml"
-#      end
    end
  
    config.vm.define :worker_2 do |n2|
@@ -49,10 +41,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
        end
        vb.customize ['storageattach', :id,  '--storagectl', 'IDE', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', thirdDisk]
      end
-#     n2.vm.provision "ansible" do |ansible|
-#       ansible.inventory_path = 'hosts'
-#       ansible.playbook = "docker_playbook.yml"
-#      end
    end
  
    config.vm.define :worker_3 do |n3|
@@ -65,21 +53,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
        end
        vb.customize ['storageattach', :id,  '--storagectl', 'IDE', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', fourthDisk]
      end
-#     n3.vm.provision "ansible" do |ansible|
-#       ansible.inventory_path = 'hosts'
-#       ansible.playbook = "docker_playbook.yml"
-#      end
    end
   
-   config.vm.provision "step1", type: "ansible" do |ansible|
-     ansible.inventory_path = 'hosts'
-     ansible.playbook = "dependencies_playbook.yml"
-   end
+#   config.vm.provision "step1", type: "ansible" do |ansible|
+#     ansible.inventory_path = 'hosts'
+#     ansible.playbook = "dependencies_playbook.yml"
+#   end
 
-   config.vm.provision "step2", type: "ansible" do |ansible|
-     ansible.inventory_path = 'hosts'
-     ansible.playbook = "swarm_playbook.yml"
-   end
+#   config.vm.provision "step2", type: "ansible" do |ansible|
+#     ansible.inventory_path = 'hosts'
+#     ansible.playbook = "swarm_playbook.yml"
+#   end
 
    config.vm.provision "step3", type: "ansible" do |ansible|
      ansible.inventory_path = 'hosts'
