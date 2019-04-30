@@ -1,0 +1,30 @@
+- hosts: docker-manager
+  become: yes
+  become_user: vagrant
+  become_method: sudo 
+  tasks:
+          - name: init gluster
+            shell: |
+                    sudo gluster peer probe node1
+                    sudo gluster peer probe node2
+                    sudo gluster peer probe node3
+                    sudo gluster volume create swarm-vols replica 4 node0:/gluster/data node1:/gluster/data node2:/gluster/data node3:/gluster/data force
+                    sudo gluster volume set swarm-vols auth.allow 127.0.0.1
+                    sudo gluster volume start swarm-vols
+            ignore_errors: yes
+
+          - name: gluster volume
+            shell: sudo mount.glusterfs localhost:/swarm-vols /swarm/volumes
+            ignore_errors: yes
+
+
+- hosts: docker-worker
+  become: yes
+  become_user: vagrant
+  become_method: sudo
+  vars:
+          docker_swarm_manager_ip: "192.168.56.101"
+  tasks:
+          - name: gluster volume
+            shell: sudo mount.glusterfs localhost:/swarm-vols /swarm/volumes
+            ignore_errors: yes
