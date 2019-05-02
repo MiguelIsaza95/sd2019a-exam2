@@ -1,4 +1,6 @@
 .vagrant/
 Disks/
 ../
-docker_playbook.retry
+dependencies_playbook.retry
+swarm_playbook.retry
+gluster_playbook.retry
