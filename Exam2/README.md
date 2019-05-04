@@ -107,9 +107,28 @@ Se verifica mediante el comando **docker ps** la construcción de los contenedor
 ![docker_ps](https://user-images.githubusercontent.com/35766585/57183909-e3e3d180-6e78-11e9-978e-69c1eee33333.png)
 
 
-**Paso 4: Visualizar
+**Paso 4: Verficar BD**
 
-![docker_ps](https://user-images.githubusercontent.com/35766585/57183909-e3e3d180-6e78-11e9-978e-69c1eee33333.png)
+Con el comando  **mysql --host=127.0.0.1 --port=32000 -u root -p**
+
+![mysql](https://user-images.githubusercontent.com/35766585/57184705-eb10dc80-6e84-11e9-9562-5918701e6cce.png)
+
+Con el  comando **show databases;** es posible verificar las bases de datos que existen en el contenedor
+
+![showdatabases](https://user-images.githubusercontent.com/35766585/57184757-c6693480-6e85-11e9-850f-58a77de94ae8.png)
+
+Con el comando **show tables;** es posible ver las tablas en la base de datos
+
+![SHOWTABLES](https://user-images.githubusercontent.com/35766585/57184803-9bcbab80-6e86-11e9-8ffa-42001cc89db8.png)
+
+Con el comando **describe favorite_colors;** evidencia los campos de la tabla
+
+![describe](https://user-images.githubusercontent.com/35766585/57184822-0977d780-6e87-11e9-87f3-225fe7919be3.png)
+
+
+**Paso 5: Visualizar**
+
+![webchrome](https://user-images.githubusercontent.com/35766585/57184962-3927df00-6e89-11e9-9f90-038bc8456204.png)
 
 
 
