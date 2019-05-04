@@ -94,3 +94,20 @@ La app se conecta como root con la contraseña configurada en el archivo docker-
 **Paso 3: Ejecutar la App**
 
 Se ejecuta con el comando **docker-compose up** e inmeditamente observar que la imagen se está construyendo, los paquetes instalados de acuerdo con los requisitos.txt, entre otros.
+
+![docker_composeup](https://user-images.githubusercontent.com/35766585/57183900-b565f680-6e78-11e9-8a56-3c1c99ee505a.png)
+
+De acuerdo a la siguiente pantalla se puede observar que la imagen de ambos contenedores se han constreuido y los paquetes instalados.
+
+![port3306](https://user-images.githubusercontent.com/35766585/57183914-04139080-6e79-11e9-924a-d2a79726a9ea.png)
+
+
+Se verifica mediante el comando **docker ps** la construcción de los contenedores de backend y app
+
+![docker_ps](https://user-images.githubusercontent.com/35766585/57183909-e3e3d180-6e78-11e9-978e-69c1eee33333.png)
+
+
+**Paso 4: Visualizar
+
+![docker_ps](https://user-images.githubusercontent.com/35766585/57183909-e3e3d180-6e78-11e9-978e-69c1eee33333.png)
+
