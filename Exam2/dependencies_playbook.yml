@@ -76,7 +76,7 @@
                     state: present
             ignore_errors: yes
 
-          - name: Creating a XFS fils system
+          - name: Creating a XFS files system
             shell: mkfs.xfs /dev/sdb1
             ignore_errors: yes
 
@@ -87,12 +87,6 @@
           - name: Mount volume
             shell: mount /dev/sdb1 /gluster/data/
             ignore_errors: yes
-
-#          - name: change gluster permissions
-#            file:
-#                    path: /var/log/glusterfs/cli.log
-#                    owner: vagrant
-#                    mode: 755
 
           - name: change docker permissions
             file:

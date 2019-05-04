@@ -55,10 +55,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
      end
    end
   
+<<<<<<< HEAD
 #   config.vm.provision "step1", type: "ansible" do |ansible|
 #     ansible.inventory_path = 'hosts'
 #     ansible.playbook = "dependencies_playbook.yml"
 #   end
+=======
+   config.vm.provision "step1", type: "ansible" do |ansible|
+     ansible.inventory_path = 'hosts'
+     ansible.playbook = "dependencies_playbook.yml"
+   end
+>>>>>>> 6680a0f0a3b9d1d9e631b17cd2e7acfce40029b2
 
    config.vm.provision "step2", type: "ansible" do |ansible|
      ansible.inventory_path = 'hosts'
