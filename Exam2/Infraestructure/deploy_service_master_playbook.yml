@@ -1,0 +1,27 @@
+- hosts: master
+  become: yes
+  become_user: vagrant
+  become_method: sudo
+  tasks:
+          - name: copying app files
+            copy:
+                    src: ../app
+                    dest: .
+
+          - name: copying db files
+            copy:
+                    src: ../db
+                    dest: .
+
+          - name: copying fluentd files
+            copy:
+                    src: ../fluentd
+                    dest: .
+
+          - name: copying docker-compose to deploy services
+            copy:
+                    src: ../docker-compose.yml
+                    dest: .
+
+          - name: deploy in master
+            shell: docker-compose up
