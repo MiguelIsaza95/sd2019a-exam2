@@ -281,6 +281,8 @@ Y lo volvemos a levantar
 
 # BIBLIOGRAFÍA
 
+How to connect to MySQL from the command line
+https://www.a2hosting.com.co/kb/developer-corner/mysql/connect-to-mysql-from-the-command-line
 
 Docker Logging via EFK (Elasticsearch + Fluentd + Kibana) Stack with Docker Compose
 https://docs.fluentd.org/v0.12/articles/docker-logging-efk-compose
