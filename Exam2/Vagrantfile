@@ -60,13 +60,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 #     ansible.playbook = "dependencies_playbook.yml"
 #   end
 
-#   config.vm.provision "step2", type: "ansible" do |ansible|
-#     ansible.inventory_path = 'hosts'
-#     ansible.playbook = "swarm_playbook.yml"
-#   end
-
-   config.vm.provision "step3", type: "ansible" do |ansible|
+   config.vm.provision "step2", type: "ansible" do |ansible|
      ansible.inventory_path = 'hosts'
-     ansible.playbook = "gluster_playbook.yml"
+     ansible.playbook = "swarm_playbook.yml"
    end
+
+#   config.vm.provision "step3", type: "ansible" do |ansible|
+#     ansible.inventory_path = 'hosts'
+#     ansible.playbook = "gluster_playbook.yml"
+#   end
 end
