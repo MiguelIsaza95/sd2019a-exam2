@@ -1,0 +1,33 @@
+- hosts: docker-manager
+  become: yes
+  tasks:
+          - name: node1
+            shell: gluster peer probe node1
+            ignore_errors: yes
+
+          - name: node2
+            shell: gluster peer probe node2
+            ignore_errors: yes
+
+          - name: node3
+            shell: gluster peer probe node3
+            ignore_errors: yes
+
+          - name: gluster volume
+            shell: gluster volume create swarm-vols replica 4 node0:/gluster/data node1:/gluster/data node2:/gluster/data node3:/gluster/data force
+            ignore_errors: yes
+
+          - name: set swarm-vols
+            shell: gluster volume set swarm-vols auth.allow 127.0.0.1
+            ignore_errors: yes
+
+          - name: start swarm-vols
+            shell: gluster volume start swarm-vols
+            ignore_errors: yes
+
+- hosts: docker-manager docker-worker
+  become: yes
+  tasks:
+          - name: gluster volume
+            shell: mount.glusterfs localhost:/swarm-vols /swarm/volumes
+            ignore_errors: yes

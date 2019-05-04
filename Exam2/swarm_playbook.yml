@@ -1,0 +1,33 @@
+- hosts: docker-manager
+  become: yes
+  become_user: vagrant
+  become_method: sudo 
+  tasks:
+
+          - name: init swarm
+            shell: docker swarm init --advertise-addr {{ ansible_eth1['ipv4']['address']  }}
+            ignore_errors: yes
+
+
+- hosts: docker-worker
+  become: yes
+  become_user: vagrant
+  become_method: sudo
+  vars:
+          docker_swarm_manager_ip: "192.168.56.101"
+  tasks:
+          - name: generate token cluster
+            shell: docker swarm join-token -q worker
+            run_once: true
+            register: docker_worker_token
+            delegate_to: "{{ groups['docker-manager'][0] }}"
+            delegate_facts: true
+
+          - name: little debug
+            debug:
+                    msg: "{{ docker_worker_token.stdout }}"
+
+          - name: join in the cluster
+            shell: docker swarm join --token "{{ docker_worker_token.stdout }}" "{{ docker_swarm_manager_ip }}":2377
+            run_once: true
+            ignore_errors: yes

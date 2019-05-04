@@ -1,0 +1,6 @@
+.vagrant/
+Disks/
+../
+dependencies_playbook.retry
+swarm_playbook.retry
+gluster_playbook.retry
