@@ -1,0 +1,96 @@
+- hosts: all
+  become: yes
+  tasks:
+
+          - name: configuration
+            shell: |
+                    echo "192.168.56.101 node0" >> /etc/hosts
+                    echo "192.168.56.102 node1" >> /etc/hosts
+                    echo "192.168.56.103 node2" >> /etc/hosts
+                    echo "192.168.56.104 node3" >> /etc/hosts
+
+          - name: install Docker
+            yum:
+                    name: docker
+                    state: present
+                    update_cache: true
+
+  
+          - name: start Docker
+            service:
+                    name: docker
+                    state: started
+
+          - name: Check if Docker compose is installed
+            command: docker-compose --version
+            register: docker_compose_check
+            ignore_errors: yes
+          
+          - name: download and install Docker compose
+            get_url:
+                    url: https://github.com/docker/compose/releases/download/1.21.2/docker-compose-Linux-x86_64
+                    dest: /usr/bin/docker-compose
+                    mode: 0755
+            when:
+                    - docker_compose_check.msg is defined
+                    - docker_compose_check.msg.find('No such file or directory') != -1
+
+          - name: update
+            yum:
+                    name: '*'
+                    state: latest
+
+          - name: install gluster dependencies
+            yum:
+                    name:
+                            - wget
+                            - centos-release-gluster
+                            - epel-release
+
+                    state: latest
+
+          - name: install gluster
+            yum:
+                    name: glusterfs-server
+                    state: latest
+
+          - name: start gluster
+            service:
+                    name: glusterd
+                    state: started
+                    enabled: yes
+
+          - name: stop firewall
+            shell: systemctl stop firewalld
+
+          - name: disable firewalld
+            shell: systemctl disable firewalld
+
+          - name: install xfs
+            yum:
+                    name: xfsprogs
+
+          - name: Volume partition
+            parted:
+                    device: /dev/sdb
+                    number: 1
+                    state: present
+            ignore_errors: yes
+
+          - name: Creating a XFS files system
+            shell: mkfs.xfs /dev/sdb1
+            ignore_errors: yes
+
+          - name: Directory
+            shell: mkdir -p /gluster/data /swarm/volumes
+            ignore_errors: yes
+
+          - name: Mount volume
+            shell: mount /dev/sdb1 /gluster/data/
+            ignore_errors: yes
+
+          - name: change docker permissions
+            file:
+                    path: /var/run/docker.sock
+                    owner: vagrant
+                    mode: 755
