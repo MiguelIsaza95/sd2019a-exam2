@@ -1,13 +1,5 @@
 version: "2"
 services:
-#  app:
-#    build: ./app
-#    links:
-#      - db
-#    ports:
-#      - "5000:5000"
-#    mem_limit: 20m   
-     
   db:
     image: mysql:5.7
     ports:
@@ -32,10 +24,10 @@ services:
         tag: httpd.access
 
   fluentd:
-    build: ./fluentd
-    volumes:
+   build: ./fluentd
+   volumes:
       - ./fluentd/conf:/fluentd/etc
-    ports:
+   ports:
       - "24224:24224"
       - "24224:24224/udp"
 
@@ -57,4 +49,3 @@ services:
     ports:
       - "5601:5601"
   
-
