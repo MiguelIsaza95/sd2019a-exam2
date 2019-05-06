@@ -220,6 +220,11 @@ La app se conecta como root con la contraseña configurada en el archivo docker-
 
 ![app_py](https://user-images.githubusercontent.com/35766585/57173206-c586c300-6df1-11e9-8b40-b03ca8896ee3.png)
 
+**init.sql**
+
+![ñññññññññññññññññññ](https://user-images.githubusercontent.com/46909824/57260109-e0db1380-7027-11e9-856f-a007f04d96c8.png)
+
+
 
 **Paso 3: Ejecutar la App**
 
