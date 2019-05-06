@@ -150,6 +150,21 @@ Luego, empezamos a usar los playbooks.yml para aprovidonar cada máquina virtual
 En este nodo copiamos todos los archivos que nos permitirán desplegar los servicios y luego desplegamos el docker-compose.yml
 
 
+**APROVISIONAMOS**
+
+![aprovisionamiento](https://user-images.githubusercontent.com/46909824/57257824-301d4600-7020-11e9-992e-fb32bd4d81fe.png)
+
+![Captura de pantalla de 2019-05-04 16-38-39](https://user-images.githubusercontent.com/46909824/57257866-5511b900-7020-11e9-8e41-43926fbddced.png)
+
+![Captura de pantalla de 2019-05-06 10-02-11](https://user-images.githubusercontent.com/46909824/57257889-61961180-7020-11e9-88e7-9d4b81a04c8c.png)
+
+![comprobacion-volumen2](https://user-images.githubusercontent.com/46909824/57257905-6bb81000-7020-11e9-991c-04ba02e19fea.png)
+
+![comprobacion-volumenes](https://user-images.githubusercontent.com/46909824/57257959-92764680-7020-11e9-826c-b6ae677efe73.png)
+
+![creacionVolumen5gb](https://user-images.githubusercontent.com/46909824/57257989-a91c9d80-7020-11e9-998e-b6b05f93dfa1.png)
+
+![gluater-worker1](https://user-images.githubusercontent.com/46909824/57258005-b46fc900-7020-11e9-83f9-c57b84b39755.png)
 
 
 # CONTENEDORES PARA EL BACKEND Y LA BASE DE DATOS
