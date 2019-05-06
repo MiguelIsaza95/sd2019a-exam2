@@ -37,6 +37,121 @@ Para ello se configura el Vagrantfile que permitirá el despliegue de 4 máquina
 
 Cada máquina virtual tiene un **disco extra de 5 Gigabytes** para las configuraciones del sistema de ficheros distribuido **(volumen)** donde se almacenarán los datos de la base de datos. Con **¿File.exist? (firstDisk)** verifica si existe o no un archivo o directorio con el nombre firstDisk. Esta función devuelve VERDADERO si el archivo o directorio existe, de lo contrario, devuelve FALSO. Esto se realiza para cada máquina virtual.
 
+![mi 1](https://user-images.githubusercontent.com/46909824/57251515-a1083200-700f-11e9-9a88-3efde02bdde7.png)  
+
+Luego, empezamos a usar los playbooks.yml para aprovidonar cada máquina virtual para poder usar Docker, docker-compose, docker swarm y gluster.
+
+**config.vm.provision "step1", type: "ansible" do |ansible|** => Le colocamos el nombre, en este caso paso 1 y a través de que se ejecuta, esta misma sentencia se realiza para todas las demás
+
+**ansible.playbook = "dependencies_playbook.yml"** => esta línea especifica donde está ubicado el playbook de Ansible donde están los comandos aprovisionar las dependencias de todas las máquinas virtuales
+
+**ansible.playbook = "swarm_playbook.yml"** => especifica el archivo donde inicializamos y cramos el cluster para poder escalar los servicios que vamos a desplegar
+
+**ansible.playbook = "gluster_playbook.yml"** => especifica el archivo que nos permitirá crear el almacenamiento compartido donde todos los nodos del cluster tengan acceso a los archivos compartidos
+
+**ansible.playbook = "deploy_service_master_playbook.yml"** => especifica el archivo donde desplegamos los servicios requeridos para la recolección, almacenamiento y visualización de Logs, una base de datos y una aplicación web que nos permita acceder a la base de datos.
+
+![mi 2](https://user-images.githubusercontent.com/46909824/57251603-d57bee00-700f-11e9-8f34-0e791e8dc763.png)  
+
+
+
+
+**dependencies_playbook.yml**
+
+![mi 3](https://user-images.githubusercontent.com/46909824/57252796-b3d03600-7012-11e9-8a9b-f4f16c0ffe10.png)
+
+![mi 4](https://user-images.githubusercontent.com/46909824/57253184-a49db800-7013-11e9-9016-66f55b382c55.png)
+
+![mi 5](https://user-images.githubusercontent.com/46909824/57253394-39a0b100-7014-11e9-9d01-3c0cb9fcaa36.png)
+
+   **--- hosts: all** => indica que se instalara en todas las maquinas
+   
+   **---become: yes** => permite activar privilegios para poder cambiarnos de usuario o usar metodos como sudo
+   
+   **---name: configuration** => especifica las direcciones de los nodos que harán parte del cluster
+   
+   **---name: install Docker** => Instala Docker y luego lo inicia
+   
+   **---name: Check if Docker compose is installed** => Revisa si el docker-compose está instalado y si no, lo descarga e instala de un repositorio en Github
+   
+   **---name: update** y **name: install gluster dependencies** =>Actualiza para poder instalar las dependencias de gluster. Seguidamente instala e inicia el gluster
+   
+   **---name: stop firewall** y **name: disable firewalld** => Detenemos el firewall porque cada vez que se va a conectar un usuario al gluster busca un puerto para poderse conectar y con esta sentencia evitamos que se restrinja dicha busqueda. Luego verificamos que este deshabilitado
+   
+   **---name: install xfs** => define un sistema de archivos para una partición 
+   
+   **---name: Volume partition** => Crea una partición
+   
+   **---name: Creating a XFS files system** => Asigna el sistema de archivos a la partición
+   
+   **---name: Directory** Creamos un directorio donde se va a montar la partición
+   
+   **---name: Mount volume** => montamos la partición al directorio
+   
+   **---name: change docker permissions** Cambiamos los permisos del Docker para que se pueda ejecutar sin super usuario
+   
+   
+
+**swarm_playbook.yml**
+
+![mi 6](https://user-images.githubusercontent.com/46909824/57254743-9f426c80-7017-11e9-8b58-91a10380f841.png)
+
+  **---hosts: docker-manager** => Indica que solo se va a ejecutar en el nodo master
+  
+  **---name: init swarm**  y  **shell: docker swarm init --advertise-addr {{ ansible_eth1['ipv4']['address']  }}** => Iniciamos el cluster 
+  
+   **---hosts: docker-worker** => En esta línea indicamos que lo siguiente se ejecutara en los nodos worker
+   
+   **---docker_swarm_manager_ip: "192.168.56.101"** => Como variables usamos la dirección del Master porque necesitamos que el Master genere el token con el cual se van a unir los demás nodos
+   
+   **---name: generate token cluster** => Indica que en las siguientes líneas se generará el token
+   
+   **---shell: docker swarm join-token -q worker** => Genera el token
+   
+   **---register: docker_worker_token** => Permite crear una variable para guardar el token
+    
+   **---delegate_to: "{{ groups['docker-manager'][0] }}"** Indica que grupos van ejecutar el comando que crea el token, como solo hay un host en el archivo (El nodo Master), él va a ser quien lo ejecuta.
+   
+   **---name: little debug**
+   
+   **---msg: "{{ docker_worker_token.stdout }}"** Imprime el resultado de la variable register
+   
+   **---name: join in the cluster** 
+   
+   **---shell: docker swarm join --token "{{ docker_worker_token.stdout }}" "{{ docker_swarm_manager_ip }}":2377**=> Se ejecuta el comando para que los cluster se unan
+   
+   
+   
+ **gluster_playbook.yml**
+ 
+ ![mi 7](https://user-images.githubusercontent.com/46909824/57256022-22b18d00-701b-11e9-97d5-b204136c5a15.png)
+ 
+ **---shell: gluster peer probe node1** => En cada nodo se incluye esta línea que permite probar si el nodo se agregó al gluster
+ 
+ **---name: gluster volume**
+ 
+ **---shell: gluster volume create swarm-vols replica 4 node0:/gluster/data node1:/gluster/data node2:/gluster/data node3:/gluster/data force**=> Crea el volumen compartido y lo replica en los 4 nodos
+ 
+  **--name: start swarm-vols** 
+  
+  **---shell: gluster volume start swarm-vols** => Con este comando inicia el volumen
+  
+  **---hosts: docker-manager docker-worker** => Indica que quien ejecutará eso será tanto el master como los workers
+  
+  **---name: gluster volume** 
+  
+  **---  shell: mount.glusterfs localhost:/swarm-vols /swarm/volumes** =>Se montan los volumenes a los nodos
+  
+   
+   **deploy_service_master_playbook.yml**
+  
+![mi 8](https://user-images.githubusercontent.com/46909824/57256953-ab312d00-701d-11e9-9928-07318d493cfe.png)
+
+En este nodo copiamos todos los archivos que nos permitirán desplegar los servicios y luego desplegamos el docker-compose.yml
+
+
+
+
 # CONTENEDORES PARA EL BACKEND Y LA BASE DE DATOS
 
 Se considera una práctica recomendada que un contenedor solo tenga una responsabilidad y un proceso, por lo que para nuestro examen utilizaremos al menos dos contenedores, uno para ejecutar la aplicación y otro para ejecutar la base de datos. La coordinación de estos contenedores se realizará a traves del docker-compose.
