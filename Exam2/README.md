@@ -422,4 +422,7 @@ https://www.a2hosting.com.co/kb/developer-corner/mysql/connect-to-mysql-from-the
 Docker Logging via EFK (Elasticsearch + Fluentd + Kibana) Stack with Docker Compose
 https://docs.fluentd.org/v0.12/articles/docker-logging-efk-compose
 
+https://github.com/caylent/ansible-docker-swarm/blob/master/docker-ce.yaml
+https://imasters.com.br/devsecops/cluster-de-docker-swarm-com-ansible
+
 
